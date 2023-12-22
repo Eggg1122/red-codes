@@ -1,0 +1,31 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.stage.Stage;
+
+public class DataVisualizationApp extends Application {
+
+    @Override
+    public void start(Stage stage) {
+        LineChart<Number, Number> lineChart = new LineChart<>(new NumberAxis(), new NumberAxis());
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+
+        // Add data points to the series
+        series.getData().add(new XYChart.Data<>(1, 5));
+        series.getData().add(new XYChart.Data<>(2, 10));
+        series.getData().add(new XYChart.Data<>(3, 15));
+
+        lineChart.getData().add(series);
+
+        Scene scene = new Scene(lineChart, 400, 300);
+        stage.setScene(scene);
+        stage.setTitle("Data Visualization Example");
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
