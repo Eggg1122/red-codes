@@ -1,31 +1,100 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.stage.Stage;
+import javax.swing.*;
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class DataVisualizationApp extends Application {
-
-    @Override
-    public void start(Stage stage) {
-        LineChart<Number, Number> lineChart = new LineChart<>(new NumberAxis(), new NumberAxis());
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
-        // Add data points to the series
-        series.getData().add(new XYChart.Data<>(1, 5));
-        series.getData().add(new XYChart.Data<>(2, 10));
-        series.getData().add(new XYChart.Data<>(3, 15));
-
-        lineChart.getData().add(series);
-
-        Scene scene = new Scene(lineChart, 400, 300);
-        stage.setScene(scene);
-        stage.setTitle("Data Visualization Example");
-        stage.show();
-    }
+class DataVisualizationAndSplitting {
 
     public static void main(String[] args) {
-        launch(args);
+        
+        List<Double> data = readDataFromCSV(System.getProperty("user.home") + "/Desktop/housepricing.csv");
+
+        
+        visualizeData(data);
+
+        
+        double splitRatio = 0.7;
+        List<Double> trainingSet = splitData(data, splitRatio);
+
+        
+        System.out.println("Training Set: " + trainingSet);
+        System.out.println("Testing Set: " + data);
+    }
+
+    private static List<Double> readDataFromCSV(String filePath) {
+        List<Double> data = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            
+            br.readLine();
+
+            
+            while ((line = br.readLine()) != null) {
+                
+                String[] values = line.split(",");
+                
+                double value = Double.parseDouble(values[0]);
+               
+                data.add(value);
+            }
+        } catch (IOException | NumberFormatException e) {
+           
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+
+    private static void visualizeData(List<Double> data) {
+        
+        SwingUtilities.invokeLater(() -> {
+            
+            JFrame frame = new JFrame("Data Visualization");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(400, 300);
+
+           
+            JPanel panel = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2d = (Graphics2D) g;
+
+                   
+                    int barWidth = getWidth() / data.size();
+                    int maxValue = Collections.max(data).intValue();
+
+                    for (int i = 0; i < data.size(); i++) {
+                        int barHeight = (int) ((data.get(i) / maxValue) * getHeight());
+                        int x = i * barWidth;
+                        int y = getHeight() - barHeight;
+
+                      
+                        g2d.setColor(Color.BLUE);
+                        g2d.fillRect(x, y, barWidth, barHeight);
+
+
+                        g2d.setColor(Color.BLACK);
+                        g2d.drawRect(x, y, barWidth, barHeight);
+                    }
+                }
+            };
+
+            
+            frame.add(panel);
+            frame.setVisible(true);
+        });
+    }
+
+    private static List<Double> splitData(List<Double> data, double splitRatio) {
+        
+        int splitIndex = (int) (data.size() * splitRatio);
+        
+        return new ArrayList<>(data.subList(0, splitIndex));
     }
 }
